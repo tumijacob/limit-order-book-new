@@ -100,12 +100,12 @@ public class ProcessLimitOrder implements Processor {
 
     private static Side parseSide(String sideStr) {
         switch(sideStr) {
-            case "B":
+            case "Buy":
                 return Side.BUY;
-            case "S":
+            case "Sell":
                 return Side.SELL;
             default:
-                throw new IllegalArgumentException("The side parameter is invalid.");
+                throw new IllegalArgumentException("Invalid entry.");
         }
     }
 
