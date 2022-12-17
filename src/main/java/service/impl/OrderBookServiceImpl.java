@@ -82,6 +82,16 @@ public class OrderBookServiceImpl implements OrderBookService {
         orders.remove(currOrder.getId());
     }
 
+    public void removeBuyHead() {
+        LimitOrder currOrder = buyOrderList.pollFirst();
+        orders.remove(currOrder.getId());
+    }
+
+    public void removeSellHead() {
+        LimitOrder currOrder = sellOrderList.pollFirst();
+        orders.remove(currOrder.getId());
+    }
+
     public LimitOrder peekBuyList() {
         assert buyOrderList.size() != 0;
 
