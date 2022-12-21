@@ -1,6 +1,6 @@
 package domain;
 
-import Enums.Side;
+import enums.Side;
 
 import java.util.Objects;
 
@@ -9,9 +9,6 @@ public abstract class Order {
     private int quantity;
     private Side side;
     private long timeStamp;
-
-    public Order() {
-    }
 
     public Order(Long id, int quantity, Side side, long timeStamp) {
         this.id = id;

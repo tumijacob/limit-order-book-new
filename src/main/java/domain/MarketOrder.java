@@ -1,6 +1,6 @@
 package domain;
 
-import Enums.Side;
+import enums.Side;
 
 
 public class MarketOrder extends Order {

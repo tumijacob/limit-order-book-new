@@ -1,10 +1,9 @@
 package service.impl;
 
-import Enums.Side;
 import domain.LimitOrder;
+import enums.Side;
 import service.OrderBookService;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +34,7 @@ public class OrderBookServiceImpl implements OrderBookService {
     }
 
     @Override
-    public void modifyOrder(Long orderId, int newQuantity, BigDecimal newPrice) {
+    public void modifyOrder(Long orderId, int newQuantity, int newPrice) {
         if (!orders.containsKey(orderId)) {
             return;
         }
@@ -49,7 +48,7 @@ public class OrderBookServiceImpl implements OrderBookService {
             Side currSide = currOrder.getSide();
             long currTime = Instant.now().getNano();
 
-            LimitOrder newOrder = new LimitOrder(orderId, newQuantity,currSide,currTime,newPrice);
+            LimitOrder newOrder = new LimitOrder(orderId, newQuantity, currSide, currTime, newPrice);
 
             orders.put(orderId, newOrder);
             addOrder(newOrder);
@@ -70,16 +69,6 @@ public class OrderBookServiceImpl implements OrderBookService {
         } else {
             sellOrderList.remove(currOrder);
         }
-    }
-
-    public void deleteBuyHead() {
-        LimitOrder currOrder = buyOrderList.pollFirst();
-        orders.remove(currOrder.getId());
-    }
-
-    public void deleteRemoveSellHead() {
-        LimitOrder currOrder = sellOrderList.pollFirst();
-        orders.remove(currOrder.getId());
     }
 
     public void removeBuyHead() {
@@ -108,7 +97,7 @@ public class OrderBookServiceImpl implements OrderBookService {
         int executableQuantity = 0;
 
         for (LimitOrder buyOrder : buyOrderList) {
-            if (buyOrder.getPrice().compareTo(currOrder.getPrice()) == -1 ) {
+            if (buyOrder.getPrice() < currOrder.getPrice())  {
                 break;
             }
 
@@ -126,7 +115,7 @@ public class OrderBookServiceImpl implements OrderBookService {
         int executableQuantity = 0;
 
         for (LimitOrder sellOrder : sellOrderList) {
-            if (currOrder.getPrice().compareTo(sellOrder.getPrice()) == -1 ) {
+            if (currOrder.getPrice() < sellOrder.getPrice()){
                 break;
             }
 
@@ -142,19 +131,11 @@ public class OrderBookServiceImpl implements OrderBookService {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("Buy:");
-        for (LimitOrder order : buyOrderList) {
-            sb.append(" " + order.toString());
-        }
-
-        sb.append("\n" + "Sell:");
-        for (LimitOrder order : sellOrderList) {
-            sb.append(" " + order.toString());
-        }
-
-        return sb.toString();
+        return "OrderBookServiceImpl{" +
+                "buyOrderList=" + buyOrderList +
+                ", sellOrderList=" + sellOrderList +
+                ", orders=" + orders +
+                '}';
     }
 
 
