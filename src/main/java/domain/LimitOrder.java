@@ -2,22 +2,27 @@ package domain;
 
 import enums.Side;
 
-import java.math.BigDecimal;
+import java.io.Serializable;
+import java.util.Objects;
 
 
-public class LimitOrder extends Order implements Comparable<LimitOrder> {
-    private int price;
+public class LimitOrder implements Comparable<LimitOrder>, Serializable {
+    private static final long serialVersionUID = 127385276176906729L;
 
-    public LimitOrder(Long id, int quantity, Side side, long timeStamp, int price) {
-        super(id, quantity, side, timeStamp);
-        this.price = price;
+    private Order order;
+
+    public LimitOrder() {
+    }
+
+    public LimitOrder(Order order) {
+        this.order = order;
     }
 
     @Override
     public int compareTo(LimitOrder other) {
-        assert getSide().equals(other.getSide());
+        assert order.getSide().equals(other.order.getSide());
 
-        if (getSide().equals(Side.BUY)) {
+        if (other.getOrder().getSide().equals(Side.BUY)) {
             return compareToBuyOrder(other);
         } else {
             return compareToSellOrder(other);
@@ -25,40 +30,50 @@ public class LimitOrder extends Order implements Comparable<LimitOrder> {
     }
 
     private int compareToBuyOrder(LimitOrder other) {
-        if (price < other.price) {
+        if (order.getPrice() < other.getOrder().getPrice()) {
             return 1;
-        } else if (price > other.price) {
+        } else if (order.getPrice() > other.getOrder().getPrice()) {
             return -1;
         } else {
-            return Long.compare(getTimeStamp(), other.getTimeStamp());
+            return Long.compare(order.getTimeStamp(), other.getOrder().getTimeStamp());
         }
     }
 
     private int compareToSellOrder(LimitOrder other) {
-        if (price > other.price) {
+        if (order.getPrice() > other.getOrder().getPrice()) {
             return 1;
-        } else if (price < other.price) {
+        } else if (order.getPrice() < other.getOrder().getPrice()) {
             return -1;
         } else {
-            return Long.compare(getTimeStamp(), other.getTimeStamp());
+            return Long.compare(order.getTimeStamp(), other.getOrder().getTimeStamp());
         }
     }
 
-    public int getPrice() {
-        return price;
+    public Order getOrder() {
+        return order;
+    }
+
+    public void setOrder(Order order) {
+        this.order = order;
     }
 
     @Override
-    public boolean isPriceless() {
-        return true;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof LimitOrder)) return false;
+        LimitOrder that = (LimitOrder) o;
+        return Objects.equals(getOrder(), that.getOrder());
     }
 
-    public void setPrice(int price) {
-        this.price = price;
+    @Override
+    public int hashCode() {
+        return Objects.hash(getOrder());
     }
 
     @Override
     public String toString() {
-        return getQuantity() + "@" + price + "#" + getId();
+        return "LimitOrder{" +
+                "order=" + order +
+                '}';
     }
 }

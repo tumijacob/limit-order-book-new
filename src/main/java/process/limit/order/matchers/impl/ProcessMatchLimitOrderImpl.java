@@ -6,15 +6,23 @@ import process.limit.order.matchers.Processor;
 import service.impl.OrderBookServiceImpl;
 
 public class ProcessMatchLimitOrderImpl implements Processor {
-    protected LimitOrder order;
+    private LimitOrder limitOrder;
 
-    public ProcessMatchLimitOrderImpl(LimitOrder order) {
-        this.order = order;
+    public ProcessMatchLimitOrderImpl(LimitOrder limitOrder) {
+        this.limitOrder = limitOrder;
+    }
+
+    public LimitOrder getLimitOrder() {
+        return limitOrder;
+    }
+
+    public void setLimitOrder(LimitOrder limitOrder) {
+        this.limitOrder = limitOrder;
     }
 
     @Override
     public void processOrder(OrderBookServiceImpl orderBook) {
-        if (order.getSide().toString().equalsIgnoreCase(Side.BUY.toString())) {
+        if (limitOrder.getOrder().getSide().equals(Side.BUY)) {
             matchBuyOrder(orderBook);
         } else {
             matchSellOrder(orderBook);
@@ -24,55 +32,55 @@ public class ProcessMatchLimitOrderImpl implements Processor {
 
     protected void matchBuyOrder(OrderBookServiceImpl orderBook) {
         int executedAmount = 0;
-        LimitOrder currOrder = order;
+        LimitOrder currOrder = limitOrder;
 
-        while (currOrder.getQuantity() > 0 && orderBook.hasSellOrder()
-                && orderBook.peekSellList().getPrice() <= currOrder.getPrice()) {
+        while (currOrder.getOrder().getQuantity() > 0 && orderBook.hasSellOrder()
+                && orderBook.peekSellList().getOrder().getPrice() <= currOrder.getOrder().getPrice()) {
 
             LimitOrder other = orderBook.peekSellList();
-            int executionPrice = other.getPrice();
-            int executionQuantity = Math.min(currOrder.getQuantity(), other.getQuantity());
+            int executionPrice = other.getOrder().getPrice();
+            int executionQuantity = Math.min(currOrder.getOrder().getQuantity(), other.getOrder().getQuantity());
 
             executedAmount += executionPrice * executionQuantity;
 
-            if (executionQuantity == other.getQuantity()) {
+            if (executionQuantity == other.getOrder().getQuantity()) {
                 orderBook.removeSellHead();
             } else {
-                other.decreaseQuantity(executionQuantity);
+                other.getOrder().decreaseQuantity(executionQuantity);
             }
-            currOrder.decreaseQuantity(executionQuantity);
+            currOrder.getOrder().decreaseQuantity(executionQuantity);
         }
 
         System.out.println(executedAmount);
 
-        if (currOrder.getQuantity() > 0) {
+        if (currOrder.getOrder().getQuantity() > 0) {
             orderBook.addOrder(currOrder);
         }
     }
 
     protected void matchSellOrder(OrderBookServiceImpl orderBook) {
         int executedAmount = 0;
-        LimitOrder currOrder = order;
+        LimitOrder currOrder = limitOrder;
 
-        while (currOrder.getQuantity() > 0 && orderBook.hasBuyOrder()
-                && orderBook.peekBuyList().getPrice() >= currOrder.getPrice()) {
+        while (currOrder.getOrder().getQuantity() > 0 && orderBook.hasBuyOrder()
+                && orderBook.peekBuyList().getOrder().getPrice() >= currOrder.getOrder().getPrice()) {
 
             LimitOrder other = orderBook.peekBuyList();
-            int executionPrice = other.getPrice();
-            int executionQuantity = Math.min(currOrder.getQuantity(), other.getQuantity());
+            int executionPrice = other.getOrder().getPrice();
+            int executionQuantity = Math.min(currOrder.getOrder().getQuantity(), other.getOrder().getQuantity());
 
             executedAmount += executionPrice * executionQuantity;
-            if (executionQuantity == other.getQuantity()) {
+            if (executionQuantity == other.getOrder().getQuantity()) {
                 orderBook.removeBuyHead();
             } else {
-                other.decreaseQuantity(executionQuantity);
+                other.getOrder().decreaseQuantity(executionQuantity);
             }
-            currOrder.decreaseQuantity(executionQuantity);
+            currOrder.getOrder().decreaseQuantity(executionQuantity);
         }
 
         System.out.println(executedAmount);
 
-        if (currOrder.getQuantity() > 0) {
+        if (currOrder.getOrder().getQuantity() > 0) {
             orderBook.addOrder(currOrder);
         }
     }

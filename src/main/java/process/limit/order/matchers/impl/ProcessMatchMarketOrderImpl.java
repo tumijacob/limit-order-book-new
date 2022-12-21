@@ -15,7 +15,7 @@ public class ProcessMatchMarketOrderImpl implements Processor {
 
     @Override
     public void processOrder(OrderBookServiceImpl orderBook) {
-        if (marketOrder.getSide().equals(Side.BUY)) {
+        if (marketOrder.getOrder().getSide().equals(Side.BUY)) {
             matchBuyOrder(orderBook);
         } else {
             matchSellOrder(orderBook);
@@ -27,19 +27,19 @@ public class ProcessMatchMarketOrderImpl implements Processor {
         int executedAmount = 0;
         MarketOrder currOrder = marketOrder;
 
-        while (currOrder.getQuantity() > 0 && orderBook.hasSellOrder()) {
+        while (currOrder.getOrder().getQuantity() > 0 && orderBook.hasSellOrder()) {
             LimitOrder other = orderBook.peekSellList();
-            int executionPrice = other.getPrice();
-            int executionQuantity = Math.min(currOrder.getQuantity(), other.getQuantity());
+            int executionPrice = other.getOrder().getPrice();
+            int executionQuantity = Math.min(currOrder.getOrder().getQuantity(), other.getOrder().getQuantity());
 
             executedAmount += executionPrice * executionQuantity;
 
-            if (executionQuantity == other.getQuantity()) {
+            if (executionQuantity == other.getOrder().getQuantity()) {
                 orderBook.removeSellHead();
             } else {
-                other.decreaseQuantity(executionQuantity);
+                other.getOrder().decreaseQuantity(executionQuantity);
             }
-            currOrder.decreaseQuantity(executionQuantity);
+            currOrder.getOrder().decreaseQuantity(executionQuantity);
         }
 
         System.out.println(executedAmount);
@@ -49,19 +49,19 @@ public class ProcessMatchMarketOrderImpl implements Processor {
         int executedAmount = 0;
         MarketOrder currOrder = marketOrder;
 
-        while (currOrder.getQuantity() > 0 && orderBook.hasBuyOrder()) {
+        while (currOrder.getOrder().getQuantity() > 0 && orderBook.hasBuyOrder()) {
             LimitOrder other = orderBook.peekBuyList();
-            int executionPrice = other.getPrice();
-            int executionQuantity = Math.min(currOrder.getQuantity(), other.getQuantity());
+            int executionPrice = other.getOrder().getPrice();
+            int executionQuantity = Math.min(currOrder.getOrder().getQuantity(), other.getOrder().getQuantity());
 
             executedAmount += executionPrice * executionQuantity;
 
-            if (executionQuantity == other.getQuantity()) {
+            if (executionQuantity == other.getOrder().getQuantity()) {
                 orderBook.removeBuyHead();
             } else {
-                other.decreaseQuantity(executionQuantity);
+                other.getOrder().decreaseQuantity(executionQuantity);
             }
-            currOrder.decreaseQuantity(executionQuantity);
+            currOrder.getOrder().decreaseQuantity(executionQuantity);
         }
 
         System.out.println(executedAmount);

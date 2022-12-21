@@ -1,17 +1,44 @@
 package domain;
 
-import enums.Side;
+import java.io.Serializable;
+import java.util.Objects;
 
+public class MarketOrder implements Serializable {
+    private static final long serialVersionUID = 5116010699092377941L;
+    private Order order;
 
-public class MarketOrder extends Order {
+    public MarketOrder() {
+    }
 
-    public MarketOrder(Long id,int quantity,Side side, long timeStamp) {
-        super(id, quantity, side, timeStamp);
+    public MarketOrder(Order order) {
+        this.order = order;
+    }
+
+    public Order getOrder() {
+        return order;
+    }
+
+    public void setOrder(Order order) {
+        this.order = order;
     }
 
     @Override
-    public boolean isPriceless() {
-        return true;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MarketOrder)) return false;
+        MarketOrder that = (MarketOrder) o;
+        return Objects.equals(getOrder(), that.getOrder());
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(getOrder());
+    }
+
+    @Override
+    public String toString() {
+        return "MarketOrder{" +
+                "order=" + order +
+                '}';
+    }
 }

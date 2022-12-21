@@ -1,6 +1,7 @@
 package service.impl;
 
 import domain.LimitOrder;
+import domain.Order;
 import enums.Side;
 import service.OrderBookService;
 
@@ -23,13 +24,13 @@ public class OrderBookServiceImpl implements OrderBookService {
     }
 
     @Override
-    public void addOrder(LimitOrder order) {
-        orders.put(order.getId(), order);
+    public void addOrder(LimitOrder limitOrder) {
+        orders.put(limitOrder.getOrder().getId(), limitOrder);
 
-        if (order.getSide().toString().equalsIgnoreCase(Side.BUY.toString())) {
-            buyOrderList.add(order);
+        if (limitOrder.getOrder().getSide().equals(Side.BUY)) {
+            buyOrderList.add(limitOrder);
         } else {
-            sellOrderList.add(order);
+            sellOrderList.add(limitOrder);
         }
     }
 
@@ -40,21 +41,23 @@ public class OrderBookServiceImpl implements OrderBookService {
         }
         LimitOrder currOrder = orders.get(orderId);
 
-        if (newPrice == currOrder.getPrice() && newQuantity < currOrder.getQuantity()) {
-            currOrder.decreaseQuantity(currOrder.getQuantity() - newQuantity);
+        if (newPrice == currOrder.getOrder().getPrice() && newQuantity < currOrder.getOrder().getQuantity()) {
+            currOrder.getOrder().decreaseQuantity(currOrder.getOrder().getQuantity() - newQuantity);
         } else {
             deleteOrder(orderId);
 
-            Side currSide = currOrder.getSide();
+            Side currSide = currOrder.getOrder().getSide();
             long currTime = Instant.now().getNano();
+            Order order = new Order(orderId, newQuantity, newPrice, currSide, currTime);
 
-            LimitOrder newOrder = new LimitOrder(orderId, newQuantity, currSide, currTime, newPrice);
+            LimitOrder newOrder = new LimitOrder(order);
 
             orders.put(orderId, newOrder);
             addOrder(newOrder);
         }
 
     }
+
     @Override
     public void deleteOrder(Long orderId) {
         if (!orders.containsKey(orderId)) {
@@ -64,7 +67,7 @@ public class OrderBookServiceImpl implements OrderBookService {
         LimitOrder currOrder = orders.get(orderId);
         orders.remove(orderId);
 
-        if (currOrder.getSide().toString().equalsIgnoreCase(Side.BUY.toString())) {
+        if (currOrder.getOrder().getSide().toString().equalsIgnoreCase(Side.BUY.toString())) {
             buyOrderList.remove(currOrder);
         } else {
             sellOrderList.remove(currOrder);
@@ -73,12 +76,12 @@ public class OrderBookServiceImpl implements OrderBookService {
 
     public void removeBuyHead() {
         LimitOrder currOrder = buyOrderList.pollFirst();
-        orders.remove(currOrder.getId());
+        orders.remove(currOrder.getOrder().getId());
     }
 
     public void removeSellHead() {
         LimitOrder currOrder = sellOrderList.pollFirst();
-        orders.remove(currOrder.getId());
+        orders.remove(currOrder.getOrder().getId());
     }
 
     public LimitOrder peekBuyList() {
@@ -97,13 +100,13 @@ public class OrderBookServiceImpl implements OrderBookService {
         int executableQuantity = 0;
 
         for (LimitOrder buyOrder : buyOrderList) {
-            if (buyOrder.getPrice() < currOrder.getPrice())  {
+            if (buyOrder.getOrder().getPrice() < currOrder.getOrder().getPrice()) {
                 break;
             }
 
-            executableQuantity += buyOrder.getQuantity();
+            executableQuantity += buyOrder.getOrder().getQuantity();
 
-            if (executableQuantity >= currOrder.getQuantity()) {
+            if (executableQuantity >= currOrder.getOrder().getQuantity()) {
                 return true;
             }
         }
@@ -115,13 +118,13 @@ public class OrderBookServiceImpl implements OrderBookService {
         int executableQuantity = 0;
 
         for (LimitOrder sellOrder : sellOrderList) {
-            if (currOrder.getPrice() < sellOrder.getPrice()){
+            if (currOrder.getOrder().getPrice() < sellOrder.getOrder().getPrice()) {
                 break;
             }
 
-            executableQuantity += sellOrder.getQuantity();
+            executableQuantity += sellOrder.getOrder().getQuantity();
 
-            if (executableQuantity >= currOrder.getQuantity()) {
+            if (executableQuantity >= currOrder.getOrder().getQuantity()) {
                 return true;
             }
         }

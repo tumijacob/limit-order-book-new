@@ -1,9 +1,6 @@
 package Main.interceptors;
 
-import domain.FillOrKillOrder;
-import domain.ImmediateOrCancelLimitOrder;
-import domain.LimitOrder;
-import domain.MarketOrder;
+import domain.*;
 import enums.Side;
 import process.limit.order.matchers.Processor;
 import process.limit.order.matchers.impl.*;
@@ -58,9 +55,11 @@ public class MatchingEngineInterceptor {
         int price = Integer.parseInt(splitInput[5]);
         long currTime = Instant.now().getNano();
 
-        LimitOrder order = new LimitOrder(Long.valueOf(orderId), quantity, side, currTime, price);
+        Order order = new Order(Long.valueOf(orderId), quantity, price, side,  currTime);
 
-        return new ProcessMatchLimitOrderImpl(order);
+        LimitOrder limitOrder = new LimitOrder(order);
+
+        return new ProcessMatchLimitOrderImpl(limitOrder);
     }
 
     private static ProcessMatchMarketOrderImpl interceptMarketOrder(String[] splitInput) {
@@ -73,9 +72,12 @@ public class MatchingEngineInterceptor {
         int quantity = Integer.parseInt(splitInput[4]);
         long currTime = Instant.now().getNano();
 
-        MarketOrder order = new MarketOrder(Long.valueOf(orderId), quantity, side, currTime);
+        Order order = new Order(Long.valueOf(orderId), quantity, side, currTime);
 
-        return new ProcessMatchMarketOrderImpl(order);
+        MarketOrder marketOrder = new MarketOrder(order);
+        marketOrder.setOrder(order);
+
+        return new ProcessMatchMarketOrderImpl(marketOrder);
     }
 
     private static ProcessDeleteOrderImpl deleteOrder(String[] splitInput) {
@@ -105,9 +107,14 @@ public class MatchingEngineInterceptor {
         int price = Integer.parseInt(splitInput[5]);
         long currTime = Instant.now().getNano();
 
-        ImmediateOrCancelLimitOrder order = new ImmediateOrCancelLimitOrder(orderId, quantity, side, currTime, price);
+        Order order = new Order(orderId, quantity, price, side, currTime);
+        LimitOrder limitOrder = new LimitOrder(order);
+        limitOrder.setOrder(order);
 
-        return new ProcessMatchMatchImmediateOrCancelOrderImpl(order);
+        ImmediateOrCancelLimitOrder iocOrder = new ImmediateOrCancelLimitOrder(limitOrder);
+        iocOrder.setLimitOrder(limitOrder);
+
+        return new ProcessMatchMatchImmediateOrCancelOrderImpl(iocOrder);
     }
 
     private static ProcessMatchFillOrKillOrderImpl interceptFokOrder(String[] splitInput) {
@@ -121,9 +128,14 @@ public class MatchingEngineInterceptor {
         int price = Integer.parseInt(splitInput[5]);
         long currTime = Instant.now().getNano();
 
-        FillOrKillOrder order = new FillOrKillOrder(orderId, quantity, side, currTime, price);
+        Order order = new Order(orderId,quantity, price, side, currTime);
+        LimitOrder limitOrder = new LimitOrder(order);
+        limitOrder.setOrder(order);
 
-        return new ProcessMatchFillOrKillOrderImpl(order);
+        FillOrKillOrder fillOrKillOrder = new FillOrKillOrder(limitOrder);
+        fillOrKillOrder.setLimitOrder(limitOrder);
+
+        return new ProcessMatchFillOrKillOrderImpl(fillOrKillOrder);
     }
 
     private static ProcessModifyOrderImpl modifyOrder(String[] splitInput) {
