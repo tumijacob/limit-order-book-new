@@ -11,9 +11,9 @@ import java.util.Map;
 import java.util.TreeSet;
 
 public class OrderBookServiceImpl implements OrderBookService {
-    private final TreeSet<LimitOrder> buyOrderList = new TreeSet<>();
-    private final TreeSet<LimitOrder> sellOrderList = new TreeSet<>();
-    private final Map<Long, LimitOrder> orders = new HashMap<>();
+    private TreeSet<LimitOrder> buyOrderList = new TreeSet<>();
+    private TreeSet<LimitOrder> sellOrderList = new TreeSet<>();
+    public Map<Long, LimitOrder> orders = new HashMap<>();
 
     public boolean hasBuyOrder() {
         return !buyOrderList.isEmpty();
@@ -67,7 +67,7 @@ public class OrderBookServiceImpl implements OrderBookService {
         LimitOrder currOrder = orders.get(orderId);
         orders.remove(orderId);
 
-        if (currOrder.getOrder().getSide().toString().equalsIgnoreCase(Side.BUY.toString())) {
+        if (currOrder.getOrder().getSide().equals(Side.BUY)) {
             buyOrderList.remove(currOrder);
         } else {
             sellOrderList.remove(currOrder);
